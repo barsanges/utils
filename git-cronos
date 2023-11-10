@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+YEAR_NOW=$(date +%y)
+MONTH_NOW=$(date +%m)
+DAY_NOW=$(date +%d)
+NOW=$(date +%s)
+
+BEGINNING_OF_DAY=$(date --date="${YEAR_NOW}-${MONTH_NOW}-${DAY_NOW}T00:00:00" +%s)
+PERIOD_START=$(date --date="${YEAR_NOW}-${MONTH_NOW}-${DAY_NOW}T21:00:00" +%s)
+END_OF_DAY=$(date --date="${YEAR_NOW}-${MONTH_NOW}-${DAY_NOW}T23:59:59" +%s)
+
+# Calcul d'une nouvelle date (au format "seconds since Epoch") :
+NEW_AS_FLOAT=$(echo "$PERIOD_START + ($END_OF_DAY - $PERIOD_START) * ($NOW - $BEGINNING_OF_DAY) / ($END_OF_DAY - $BEGINNING_OF_DAY)" | bc -l)
+
+# Conversion en un entier :
+NEW_AS_INT=$(printf "%.0f" $NEW_AS_FLOAT)
+
+# Commit effectif :
+GIT_AUTHOR_DATE=$NEW_AS_INT GIT_COMMITTER_DATE=$GIT_AUTHOR_DATE git commit -m "$1"
